@@ -1,0 +1,919 @@
+---
+title: "Youtube Data Visualization"
+author: "Project group B - Mahesh, Vanditt, Sandhya, Vinay, Pardis, Vinay, Naveen, Sai Krishna"
+output: 
+  html_document: 
+    fig_height: 6
+    fig_width: 9
+    highlight: null
+    theme: cosmo
+    toc: yes
+---
+
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+
+![](https://i.imgur.com/ugnD4Ab.png)
+
+  
+
+  
+
+  
+
+* **YouTube** is an American video-sharing website headquartered in San Bruno, California. The service was created by three former PayPal employees—Chad Hurley, Steve Chen, and Jawed Karim—in February 2005. Google bought the site in November 2006 for US$1.65 billion; YouTube now operates as one of Google's subsidiaries.
+
+
+```{r include=FALSE}
+
+set.seed(123)
+
+# Data manipulation
+
+library(data.table)
+
+library(dplyr)
+
+library(DT)
+
+# Time manipulation
+
+library(lubridate)
+
+# Visualization
+
+library(ggplot2)
+
+library(plotrix)
+
+library(corrplot)
+
+library(ggdendro)
+
+library(ggrepel)
+
+# Wordcloud
+
+library(wordcloud)
+
+# Text manipulation
+
+library(tidytext)
+
+library(stringr)
+
+library(tm)
+
+library(sentimentr)
+
+library(wordcloud)
+
+library(RSentiment)
+
+```
+
+
+```{r include=FALSE}
+
+gb <- tail(fread("GBvideos.csv",encoding = "UTF-8"),20000)
+
+gb[,"Location":="GB"]
+
+fr <- tail(fread("FRvideos.csv",encoding = "UTF-8"),20000)
+
+fr[,"Location":="FR"]
+
+ca <- tail(fread("CAvideos.csv",encoding = "UTF-8"),20000)
+
+ca[,"Location":="CA"]
+
+us <- tail(fread("USvideos.csv",encoding = "UTF-8"),20000)
+
+us[,"Location":="US"]
+
+de <- tail(fread("DEvideos.csv",encoding = "UTF-8"),20000)
+
+de[,"Location":="DE"]
+
+
+
+videos <- as.data.table(rbind(gb,fr,ca,us,de))
+
+videos$trending_date <- ydm(videos$trending_date)
+
+videos$publish_time <- ymd(substr(videos$publish_time,start = 1,stop = 10))
+
+videos$dif_days <- videos$trending_date-videos$publish_time
+
+```
+
+
+
+
+# Top 5 Liked/Disliked/Comments {.tabset .tabset-pills}
+
+
+
+## Viewed videos
+
+```{r echo=FALSE}
+
+mvideo <- videos[,.("Total_Views"=round(max(views,na.rm = T),digits = 2)),by=.(title,thumbnail_link)][order(-Total_Views)]
+
+
+
+mvideo %>% 
+
+  mutate(image = paste0('<img width="80%" height="80%" src="', thumbnail_link , '"></img>')) %>% 
+
+  arrange(-Total_Views) %>% 
+
+  top_n(5,wt = Total_Views) %>% 
+
+  select(Total_Views, title, image) %>% 
+
+  datatable(class = "nowrap hover row-border", escape = FALSE, options = list(dom = 't',scrollX = TRUE, autoWidth = TRUE))
+
+```
+
+
+
+
+
+## Liked videos
+
+```{r echo=FALSE}
+
+mvideo <- videos[,.("Total_Likes"=round(max(likes,na.rm = T),digits = 2)),by=.(title,thumbnail_link)][order(-Total_Likes)]
+
+
+
+mvideo %>% 
+
+  mutate(image = paste0('<img width="80%" height="80%" src="', thumbnail_link , '"></img>')) %>% 
+
+  arrange(-Total_Likes) %>% 
+
+  top_n(5,wt = Total_Likes) %>% 
+
+  select(Total_Likes, title, image) %>% 
+
+  datatable(class = "nowrap hover row-border", escape = FALSE, options = list(dom = 't',scrollX = TRUE, autoWidth = TRUE))
+
+```
+
+
+
+## Disliked videos
+
+```{r echo=FALSE}
+
+mvideo <- videos[,.("Total_Dislikes"=round(max(dislikes,na.rm = T),digits = 2)),by=.(title,thumbnail_link)][order(-Total_Dislikes)]
+
+
+
+mvideo %>% 
+
+  mutate(image = paste0('<img width="80%" height="80%" src="', thumbnail_link , '"></img>')) %>% 
+
+  arrange(-Total_Dislikes) %>% 
+
+  top_n(5,wt = Total_Dislikes) %>% 
+
+  select(Total_Dislikes, title, image) %>% 
+
+  datatable(class = "nowrap hover row-border", escape = FALSE, options = list(dom = 't',scrollX = TRUE, autoWidth = TRUE))
+
+```
+
+
+
+
+
+## Commented videos
+
+```{r echo=FALSE}
+
+mvideo <- videos[,.("Total_comments"=round(max(comment_count,na.rm = T),digits = 2)),by=.(title,thumbnail_link)][order(-Total_comments)]
+
+
+
+mvideo %>% 
+
+  mutate(image = paste0('<img width="80%" height="80%" src="', thumbnail_link , '"></img>')) %>% 
+
+  arrange(-Total_comments) %>% 
+
+  top_n(10,wt = Total_comments) %>% 
+
+  select(image, title, Total_comments) %>% 
+
+  datatable(class = "nowrap hover row-border", escape = FALSE, options = list(dom = 't',scrollX = TRUE, autoWidth = TRUE))
+
+```
+
+
+
+# Top 7 trending Channels in the world
+
+```{r echo=FALSE}
+
+ggplot(videos[,.N,by=channel_title][order(-N)][1:7],aes(reorder(channel_title,-N),N,fill=channel_title))+geom_bar(stat="identity")+geom_label(aes(label=N))+guides(fill="none")+theme(axis.text.x = element_text(angle = 0,hjust = 1))+  labs(caption="CMPE-274",title=" Top trending channels")+
+
+xlab(NULL)+ylab(NULL)+coord_flip()
+
+```
+
+
+
+# Time taken for a video trend
+
+```{r echo=FALSE}
+
+ggplot(videos[dif_days<30],aes(as.factor(dif_days),fill=as.factor(dif_days)))+geom_bar()+guides(fill="none")+labs(caption="CMPE-274",title="Days taken for a video to trend")+xlab(NULL)+ylab(NULL)
+
+```
+
+
+
+* Vidoes generally take 1 or 2 days to trend after publishing. If they are not trending by day 3, they will probably never trend.
+
+
+# Views Vs Likes
+
+```{r echo=FALSE}
+
+ggplot(videos[,.("views"=max(views),"likes"=max(likes)),by=title],aes(views,likes,colour=likes,size=likes))+geom_jitter()+geom_smooth()+guides(fill="none")+labs(caption="CMPE-274",title="Views Vs Likes")+theme(legend.position = "none")+geom_text_repel(data=subset(videos[,.("views"=max(views),"likes"=max(likes)),by=title], views > 5e+07),
+
+            aes(views,likes,label=title),check_overlap=T)
+
+```
+
+
+
+# Likes Vs Comment
+
+```{r echo=FALSE}
+
+ggplot(videos[,.("comment_count"=max(comment_count),"likes"=max(likes)),by=title],aes(comment_count,likes,colour=likes,size=likes))+geom_jitter()+geom_smooth()+guides(fill="none")+labs(caption="CMPE-274",title="Views Vs Comment")+
+
+  theme(legend.position = "none")+geom_text_repel(data=subset(videos[,.("comment_count"=max(comment_count),"likes"=max(likes)),by=title], likes > 1e+06),
+
+            aes(comment_count,likes,label=title),check_overlap=T)
+
+```
+
+
+
+# Sentiment Analysis Description field
+
+```{r include=FALSE}
+
+corpus = Corpus(VectorSource(list(sample(videos$description,size=2000))))
+
+corpus = tm_map(corpus, removePunctuation)
+
+corpus = tm_map(corpus, content_transformer(tolower))
+
+corpus = tm_map(corpus, removeNumbers) 
+
+corpus = tm_map(corpus, stripWhitespace)
+
+corpus = tm_map(corpus, removeWords, stopwords('english'))
+
+
+
+dtm_eap = DocumentTermMatrix(VCorpus(VectorSource(corpus[[1]]$content)))
+
+freq_eap <- colSums(as.matrix(dtm_eap))
+
+sentiments_eap = calculate_sentiment(names(freq_eap))
+
+ sentiments <- as.data.table(sentiments_eap)
+
+ sentiments1 <- sentiments[,.N,by=.(sentiment)]
+
+ sentiments1[,"Total":=sum(N)]
+
+ sentiments1 <- sentiments1[,.("Percentage"=100*N/Total),by=.(sentiment)]
+
+```
+
+
+
+
+
+
+
+```{r echo=FALSE}
+
+ggplot(sentiments1,aes(x = sentiment,y = Percentage ,fill=sentiment ))+
+
+  geom_bar(stat = "identity") +
+
+  ggtitle("Description Sentiments")+xlab("Sentiment")+ylab("% Sentiment")+ 
+
+  theme(axis.text.x = element_text(angle = 0, size=8,hjust = 1))
+
+
+
+```
+
+
+
+* Most sentiments are neutral. However, Creators tend to write more negative descriptions than positive!
+
+```{r echo=FALSE,message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+set.seed(123)
+# Data manipulation
+if(!require(summarytools)){
+    install.packages("summarytools")
+    library(summarytools)
+}
+if(!require(xtable)){
+    install.packages("xtable")
+    library(xtable)
+}
+if(!require(tm)){
+    install.packages("tm")
+    library(tm)
+}
+if(!require(wordcloud)){
+    install.packages("wordcloud")
+    library(wordcloud)
+}
+if(!require(plotly)){
+    install.packages("plotly")
+    library(plotly)
+}
+if(!require(purrr)){
+    install.packages("purrr")
+    library(purrr)
+}
+if(!require(stringr)){
+    install.packages("stringr")
+    library(stringr)
+}
+if(!require(IRdisplay)){
+    install.packages("IRdisplay")
+    library(IRdisplay)
+}
+if(!require(repr)){
+    install.packages("repr")
+    library(repr)
+}
+
+if(!require(data.table)){
+    install.packages("data.table")
+    library(data.table)
+}
+if(!require(magrittr)){
+    install.packages("magrittr")
+    library(magrittr)
+}
+if(!require(qwraps2)){
+    install.packages("qwraps2")
+    library(qwraps2)
+}
+if(!require(dplyr)){
+    install.packages("dplyr")
+    library(dplyr)
+}
+
+if(!require(DT)){
+    install.packages("DT")
+    library(DT)
+}
+
+# Time manipulation
+if(!require(lubridate)){
+    install.packages("lubridate")
+    library(lubridate)
+}
+
+# Visualization
+if(!require(ggplot2)){
+    install.packages("ggplot2")
+    library(ggplot2)
+}
+
+if(!require(plotrix)){
+    install.packages("plotrix")
+    library(plotrix)
+}
+
+if(!require(corrplot)){
+    install.packages("corrplot")
+    library(corrplot)
+}
+
+if(!require(ggdendro)){
+    install.packages("ggdendro")
+    library(ggdendro)
+}
+
+if(!require(ggrepel)){
+    install.packages("ggrepel")
+    library(ggrepel)
+}
+# Text manipulation
+if(!require(tidytext)){
+    install.packages("tidytext")
+    library(tidytext)
+}
+
+if(!require(stringr)){
+    install.packages("stringr")
+    library(stringr)
+}
+
+if(!require(tm)){
+    install.packages("tm")
+    library(tm)
+}
+
+if(!require(sentimentr)){
+    install.packages("sentimentr")
+    library(sentimentr)
+}
+
+if(!require(wordcloud)){
+    install.packages("wordcloud")
+    library(wordcloud)
+}
+
+if(!require(RSentiment)){
+    install.packages("RSentiment")
+    library(RSentiment)
+}
+
+
+if(!require(RSentiment)){
+    install.packages("RSentiment")
+    library(RSentiment)
+}
+if(!require(corrgram)){
+    install.packages("corrgram")
+    library(corrgram)
+}
+if(!require(hexbin)){
+    install.packages("hexbin")
+    library(hexbin)
+}
+
+if(!require(GGally)){
+    install.packages("GGally")
+    library(GGally)
+}
+if(!require(gridExtra)){
+    install.packages("gridExtra")
+    library(gridExtra)
+}
+if(!require(jsonlite)){
+    install.packages("jsonlite")
+    library(jsonlite)
+}
+    
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=TRUE}
+x = read_json("FR_category_id.json", simplifyVector = FALSE)
+ht <- new.env()
+for(x in x$items){
+    assign(as.character(x$id), x$snippet$title, ht)
+    }
+fr <- read.csv("FRvideos.csv", header = TRUE, sep = ",", quote = "\"",
+        dec = ".", fill = TRUE, comment.char = "")
+getCategory <- function(id){
+    tryCatch({
+    get(as.character(id), ht)
+}, error = function(e) {
+    'undefined'
+})
+             }
+
+videos <- as.data.table(fr)
+videos$trending_date <- ydm(videos$trending_date)
+videos$publish_time <- ymd(substr(videos$publish_time,start = 1,stop = 10))
+dif_days = lapply((videos$trending_date-videos$publish_time), as.numeric)
+videos$dif_days <- as.numeric(unlist(dif_days)) #Actually dif_day is a time difference in day, 
+#we apply a function that convert time difference in day in double type
+videos[,"Percentage_Likes":=round(100*(likes)/views,digits = 4)]
+videos[,"Percentage_Disikes":=round(100*(dislikes)/views,digits = 4)]
+videos[,"Percentage_comments":=round(100*(comment_count)/views,digits = 4)]
+videos[,"Percentage_views_days":=round(100*(views)/dif_days,digits = 4)]
+videos[,"Links_count":= str_count(description, pattern = "http")]
+url_pattern <- "http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+videos$description <- flatten_chr(map(videos$description, function(x) str_replace_all(x, "\\\\n|,", " ")))
+videos[,"Urls_description":= str_extract_all(description, pattern = url_pattern)]
+videos[,"Reference_count":= str_count(Urls_description, pattern = "www.youtube.com/channel|www.youtube.com/user/")]
+videos$category <- flatten_chr(map(videos$category_id,function(x) getCategory(x)))
+videos = videos[order(views, decreasing=TRUE)]
+
+```
+
+
+
+```{r echo=FALSE}
+p <- plot_ly(videos, labels = ~category, type = 'pie') %>%
+  layout(title = 'Number of videos per category',
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+p
+```
+
+```{r echo=FALSE}
+p <- plot_ly(videos, labels = ~category, values = ~views, type = 'pie') %>%
+  layout(title = 'Youtubes Video Views per categories',
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+p
+```
+
+
+
+# Relationship betwenn Views, Likes and Coment Counts 
+```{r echo=FALSE}
+colors <- c('#4AC6B7', '#1972A4', '#965F8A', '#FF7070', '#C61951')
+p = plot_ly(x=videos$likes, y=videos$views, z=videos$comment_count, marker = list(color = videos$views, colorscale = c('#FFE1A1', '#683531'), showscale = TRUE)) %>%
+  add_markers() %>%
+  layout(scene = list(xaxis = list(title = 'Likes'),
+                     yaxis = list(title = 'Views'),
+                     zaxis = list(title = 'Comment Counts')))
+p
+```
+
+
+
+
+
+
+# Analysis of title & tags with wordcloud
+Word analysis gives us a good idea of the themes of the moment, the types of videos that work by categories.
+We therefore retrieve a set of words that returns frequently by removing as many linking words as possible and we can return a bag of words associated with the category and the text
+
+## Word cloud of videos title per categories {.tabset .tabset-fade}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+#Testing a bug
+freqWord = function(categ) {
+docs = Corpus(VectorSource(videos[category == categ]$title))
+
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, toSpace, "/")
+docs <- tm_map(docs, toSpace, "@")
+docs <- tm_map(docs, toSpace, "\\|")
+# Convert the text to lower case
+docs <- tm_map(docs, content_transformer(tolower))
+# Remove numbers
+docs <- tm_map(docs, removeNumbers)
+# Remove english common stopwords
+docs <- tm_map(docs, removeWords, stopwords("english"))
+# Remove your own stop word
+# specify your stopwords as a character vector
+docs <- tm_map(docs, removeWords, c("des", "les", "pas", "de", "est", "plus", "vos")) 
+# Remove punctuations
+docs <- tm_map(docs, removePunctuation)
+# Eliminate extra white spaces
+docs <- tm_map(docs, stripWhitespace)
+# Text stemming
+# docs <- tm_map(docs, stemDocument)
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+}
+```
+
+### Music 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+freqWord("Music")
+```
+
+
+### Entertainment
+
+```{r echo=FALSE ,message=FALSE, warning=FALSE}
+freqWord("Entertainment")
+```
+
+
+### Gaming
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("Gaming")
+```
+
+### Film & Animation
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("Film & Animation")
+```
+
+### Autos & Vehicles
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("Autos & Vehicles")
+```
+
+### Pets & Animals
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("Pets & Animals")
+```
+
+### Sports
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("Sports")
+```
+
+### Travel & Events
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("Travel & Events")
+```
+
+### Gaming
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("Gaming")
+```
+
+### People & Blogs
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("People & Blogs")
+```
+
+### Comedy
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("Comedy")
+```
+
+### News & Politics
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("News & Politics")
+```
+
+### Howto & Style
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("Howto & Style")
+```
+
+### Education
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("Education")
+```
+
+### Science & Technology
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("Science & Technology")
+```
+
+### Undefined
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWord("undefined")
+```
+
+
+
+## Word cloud of of videos tags per categories {.tabset .tabset-fade}
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+freqWordTag = function(categ) {
+docs = Corpus(VectorSource(videos[category == categ]$tags))
+
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, toSpace, "/")
+docs <- tm_map(docs, toSpace, "@")
+docs <- tm_map(docs, toSpace, "\\|")
+# Convert the text to lower case
+docs <- tm_map(docs, content_transformer(tolower))
+# Remove numbers
+docs <- tm_map(docs, removeNumbers)
+# Remove english common stopwords
+docs <- tm_map(docs, removeWords, stopwords("english"))
+# Remove your own stop word
+# specify your stopwords as a character vector
+docs <- tm_map(docs, removeWords, c("des", "les", "pas", "de", "est", "plus", "vos", "none")) 
+# Remove punctuations
+docs <- tm_map(docs, removePunctuation)
+# Eliminate extra white spaces
+docs <- tm_map(docs, stripWhitespace)
+# Text stemming
+# docs <- tm_map(docs, stemDocument)
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+}
+```
+
+### Music 
+
+```{r echo=FALSE,message=FALSE, warning=FALSE, paged.print=FALSE}
+freqWordTag("Music")
+```
+
+
+### Entertainment
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("Entertainment")
+```
+
+
+### Gaming
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("Gaming")
+```
+
+### Film & Animation
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("Film & Animation")
+```
+
+### Autos & Vehicles
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("Autos & Vehicles")
+```
+
+### Pets & Animals
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("Pets & Animals")
+```
+
+### Sports
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("Sports")
+```
+
+### Travel & Events
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("Travel & Events")
+```
+
+### Gaming
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("Gaming")
+```
+
+### People & Blogs
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("People & Blogs")
+```
+
+### Comedy
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("Comedy")
+```
+
+### News & Politics
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("News & Politics")
+```
+
+### Howto & Style
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("Howto & Style")
+```
+
+### Education
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("Education")
+```
+
+### Science & Technology
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("Science & Technology")
+```
+
+### Undefined
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+freqWordTag("undefined")
+```
+
+## Analysis 1% / 10% / 25% of views {.tabset .tabset-fade}
+The goal of this study is to determine how the views field of the videos behave when we compare the top 1% , 10%, 25% vs the rest.
+
+```{r echo=FALSE}
+subset = function(percentage) {
+    len = length(videos$likes)
+   return (list((left = videos[0:floor(len*percentage)]), (right = videos[floor((len*percentage)+1): len-1])))
+}
+```
+
+### 25% / 75%
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+x = subset(0.25)
+left = x[[1]]
+right = x[[2]]
+left = left[category != 'Music']
+right = right[category != 'Music']
+p1 <- plot_ly(type = 'box')  %>%
+  add_boxplot(x = left$category, y = left$views, 
+              name = "Views 25%", boxpoints = 'outliers',
+              marker = list(color = 'rgb(107,174,214)'),
+              line = list(color = 'rgb(107,174,214)')) %>%
+  layout(p, yaxis = list(type = "log"))
+p2 <- plot_ly(type = 'box')  %>%
+  add_boxplot(x = right$category, y = right$views, name = "Views 75%", boxpoints = 'outliers',
+              marker = list(color = 'rgb(9,56,125)'),
+              line = list(color = 'rgb(9,56,125)'))%>%
+  layout(p, yaxis = list(type = "log"), title = "Box plots for views for 2 subdataset")
+p <- subplot(p1, p2)
+p
+```
+
+### 10% / 90%
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+x = subset(0.10)
+left = x[[1]]
+right = x[[2]]
+left = left[category != 'Music']
+right = right[category != 'Music']
+p1 <- plot_ly(type = 'box')  %>%
+  add_boxplot(x = left$category, y = left$views, 
+              name = "Views 10%", boxpoints = 'outliers',
+              marker = list(color = 'rgb(107,174,214)'),
+              line = list(color = 'rgb(107,174,214)')) %>%
+  layout(p, yaxis = list(type = "log"))
+p2 <- plot_ly(type = 'box')  %>%
+  add_boxplot(x = right$category, y = right$views, name = "Views 90%", boxpoints = 'outliers',
+              marker = list(color = 'rgb(9,56,125)'),
+              line = list(color = 'rgb(9,56,125)'))%>%
+  layout(p, yaxis = list(type = "log"), title = "Box plots for views for 2 subdataset")
+p <- subplot(p1, p2)
+p
+```
+
+### 1% / 99%
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+x = subset(0.1)
+left = x[[1]]
+right = x[[2]]
+left = left[category != 'Music']
+right = right[category != 'Music']
+p1 <- plot_ly(type = 'box')  %>%
+  add_boxplot(x = left$category, y = left$views, 
+              name = "Views 1%", boxpoints = 'outliers',
+              marker = list(color = 'rgb(107,174,214)'),
+              line = list(color = 'rgb(107,174,214)')) %>%
+  layout(p, yaxis = list(type = "log"))
+p2 <- plot_ly(type = 'box')  %>%
+  add_boxplot(x = right$category, y = right$views, name = "Views 99", boxpoints = 'outliers',
+              marker = list(color = 'rgb(9,56,125)'),
+              line = list(color = 'rgb(9,56,125)'))%>%
+  layout(p, yaxis = list(type = "log"), title = "Box plots for views for 2 subdataset")
+p <- subplot(p1, p2)
+p
+```
+
+
+
+* End of CMPE-274 Youtube Analytics report

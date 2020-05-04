@@ -1,0 +1,562 @@
+
+
+---
+title: "R Notebook"
+author: "Alexis Gardin, Natan Bekele, Jérémi Ferre, Gabriel Djebbar"
+output:
+  html_document:
+    number_sections: false
+    toc: true
+    toc_depth: 6
+    highlight: tango
+    theme: cosmo
+    smart: true
+    code_folding: hide
+    df_print: paged
+editor_options:
+  chunk_output_type: console
+---
+
+
+
+
+```
+##       video_id trending_date
+## 1: FlsCjmMhFmw    2017-12-10
+## 2: FlsCjmMhFmw    2017-12-09
+## 3: 7C2z4GqqS5E    2018-05-21
+## 4: 7C2z4GqqS5E    2018-05-20
+## 5: VYOjWnS4cMY    2018-05-10
+## 6: FlsCjmMhFmw    2017-12-08
+##                                                  title       channel_title
+## 1:  YouTube Rewind: The Shape of 2017 | #YouTubeRewind   YouTube Spotlight
+## 2:  YouTube Rewind: The Shape of 2017 | #YouTubeRewind   YouTube Spotlight
+## 3:            BTS (방탄소년단) 'FAKE LOVE' Official MV             ibighit
+## 4:            BTS (방탄소년단) 'FAKE LOVE' Official MV             ibighit
+## 5: Childish Gambino - This Is America (Official Video) ChildishGambinoVEVO
+## 6:  YouTube Rewind: The Shape of 2017 | #YouTubeRewind   YouTube Spotlight
+##    category_id publish_time
+## 1:          24   2017-12-06
+## 2:          24   2017-12-06
+## 3:          10   2018-05-18
+## 4:          10   2018-05-18
+## 5:          10   2018-05-06
+## 6:          24   2017-12-06
+##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             tags
+## 1: Rewind"|"Rewind 2017"|"youtube rewind 2017"|"#YouTubeRewind"|"Rewind 2016"|"Dan and Phil"|"Grace Helbig"|"HolaSoyGerman"|"Lilly Singh"|"Markiplier"|"Swoozie"|"Rhett Link"|"Liza Koshy"|"Dolan Twins"|"Lele Pons"|"Jake Paul"|"Logan Paul"|"KSI"|"Joey Graceffa"|"Casey Neistat"|"Poppy"|"Niana Guerrero"|"Daddy Yankee"|"Luis Fonsi"|"Ed Sheeran"|"Kendrick Lamar"|"Stephen Colbert"|"Fidget Spinners"|"Slime"|"Backpack Kid"|"April the Giraffe"|"#Rewind"|"Despacito"|"Shape of you"|"YouTubeRewind"|"I’m the One"|"Humble
+## 2: Rewind"|"Rewind 2017"|"youtube rewind 2017"|"#YouTubeRewind"|"Rewind 2016"|"Dan and Phil"|"Grace Helbig"|"HolaSoyGerman"|"Lilly Singh"|"Markiplier"|"Swoozie"|"Rhett Link"|"Liza Koshy"|"Dolan Twins"|"Lele Pons"|"Jake Paul"|"Logan Paul"|"KSI"|"Joey Graceffa"|"Casey Neistat"|"Poppy"|"Niana Guerrero"|"Daddy Yankee"|"Luis Fonsi"|"Ed Sheeran"|"Kendrick Lamar"|"Stephen Colbert"|"Fidget Spinners"|"Slime"|"Backpack Kid"|"April the Giraffe"|"#Rewind"|"Despacito"|"Shape of you"|"YouTubeRewind"|"I’m the One"|"Humble
+## 3:                                                                                                                                                                                                                                                                                                                                                                                                                                                                 BIGHIT|빅히트|방탄소년단|BTS|BANGTAN|방탄|FAKE LOVE|FAKE_LOVE
+## 4:                                                                                                                                                                                                                                                                                                                                                                                                                                                                 BIGHIT|빅히트|방탄소년단|BTS|BANGTAN|방탄|FAKE LOVE|FAKE_LOVE
+## 5:                                                                                                                                                                                                                                                                                                                                                                                                                                                               Childish Gambino|Rap|This Is America|mcDJ Recording/RCA Records
+## 6: Rewind"|"Rewind 2017"|"youtube rewind 2017"|"#YouTubeRewind"|"Rewind 2016"|"Dan and Phil"|"Grace Helbig"|"HolaSoyGerman"|"Lilly Singh"|"Markiplier"|"Swoozie"|"Rhett Link"|"Liza Koshy"|"Dolan Twins"|"Lele Pons"|"Jake Paul"|"Logan Paul"|"KSI"|"Joey Graceffa"|"Casey Neistat"|"Poppy"|"Niana Guerrero"|"Daddy Yankee"|"Luis Fonsi"|"Ed Sheeran"|"Kendrick Lamar"|"Stephen Colbert"|"Fidget Spinners"|"Slime"|"Backpack Kid"|"April the Giraffe"|"#Rewind"|"Despacito"|"Shape of you"|"YouTubeRewind"|"I’m the One"|"Humble
+##        views   likes dislikes comment_count
+## 1: 100911567 2656682  1353661        682890
+## 2:  75969469 2251828  1127813        827755
+## 3:  65396157 4750254   141966       1040912
+## 4:  62796390 4470923   119052        905925
+## 5:  60776509 2183745   104379        232723
+## 6:  52611730 1891827   884962        702790
+##                                    thumbnail_link comments_disabled
+## 1: https://i.ytimg.com/vi/FlsCjmMhFmw/default.jpg             False
+## 2: https://i.ytimg.com/vi/FlsCjmMhFmw/default.jpg             False
+## 3: https://i.ytimg.com/vi/7C2z4GqqS5E/default.jpg             False
+## 4: https://i.ytimg.com/vi/7C2z4GqqS5E/default.jpg             False
+## 5: https://i.ytimg.com/vi/VYOjWnS4cMY/default.jpg             False
+## 6: https://i.ytimg.com/vi/FlsCjmMhFmw/default.jpg             False
+##    ratings_disabled video_error_or_removed
+## 1:            False                  False
+## 2:            False                  False
+## 3:            False                  False
+## 4:            False                  False
+## 5:            False                  False
+## 6:            False                  False
+##                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              description
+## 1:                                                                                              YouTube Rewind 2017. Celebrating the videos  people  music and memes that made 2017. #YouTubeRewind  Meet the featured Creators in Rewind: https://rewind2017.withyoutube.com/creators Spend more time with your favorite Creators  videos and trends from 2017: https://yt.be/rewind2017 Test your Rewind knowledge with our trivia game: http://yt.be/dejaview  Watch trending videos from 2017: http://youtube.com/rewind See the trends as they happen: http://youtube.com/trending  Watch the Behind the Scenes video: https://youtu.be/OIQQ8jmsbMM   See all the Easter Eggs: https://goo.gl/3U9otg  Music by The Hood Internet: https://www.youtube.com/thehoodinternet  YouTube Rewind 2017 produced by Portal A
+## 2:                                                                                              YouTube Rewind 2017. Celebrating the videos  people  music and memes that made 2017. #YouTubeRewind  Meet the featured Creators in Rewind: https://rewind2017.withyoutube.com/creators Spend more time with your favorite Creators  videos and trends from 2017: https://yt.be/rewind2017 Test your Rewind knowledge with our trivia game: http://yt.be/dejaview  Watch trending videos from 2017: http://youtube.com/rewind See the trends as they happen: http://youtube.com/trending  Watch the Behind the Scenes video: https://youtu.be/OIQQ8jmsbMM   See all the Easter Eggs: https://goo.gl/3U9otg  Music by The Hood Internet: https://www.youtube.com/thehoodinternet  YouTube Rewind 2017 produced by Portal A
+## 3: BTS (방탄소년단) 'FAKE LOVE' Official MVDirector : YongSeok Choi (Lumpens)Assistant Director : WonJu Lee  Guzza  HyeJeong Park  MinJe Jeong (Lumpens)Director of Photography : HyunWoo Nam(GDW)Gaffer : HyunSuk Song (Real Lighting)Art Director : JinSil Park Bona Kim (MU:E)Construction Manager : SukKi Song Special Effect : DemolitionBigHit Entertainment. Rights are reserved selectively in the video.Unauthorized reproduction is a violation of applicable laws. Manufactured by BigHit Entertainment  Seoul  KoreaConnect with BTS:http://www.ibighit.com http://twitter.com/BTS_bighit http://twitter.com/BTS_twt https://www.facebook.com/ibighit/http://www.facebook.com/bangtan.officialhttp://instagram.com/BTS.bighitofficialhttp://weibo.com/BTSbighitBU content certified by Big Hit Entertainment
+## 4: BTS (방탄소년단) 'FAKE LOVE' Official MVDirector : YongSeok Choi (Lumpens)Assistant Director : WonJu Lee  Guzza  HyeJeong Park  MinJe Jeong (Lumpens)Director of Photography : HyunWoo Nam(GDW)Gaffer : HyunSuk Song (Real Lighting)Art Director : JinSil Park Bona Kim (MU:E)Construction Manager : SukKi Song Special Effect : DemolitionBigHit Entertainment. Rights are reserved selectively in the video.Unauthorized reproduction is a violation of applicable laws. Manufactured by BigHit Entertainment  Seoul  KoreaConnect with BTS:http://www.ibighit.com http://twitter.com/BTS_bighit http://twitter.com/BTS_twt https://www.facebook.com/ibighit/http://www.facebook.com/bangtan.officialhttp://instagram.com/BTS.bighitofficialhttp://weibo.com/BTSbighitBU content certified by Big Hit Entertainment
+## 5:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 “This is America” by Childish Gambino http://smarturl.it/TcIgADirector: Hiro MuraiProducer: Doomsday with Ibra Ake and Fam Rothstein of Wolf + Rothsteintour tickets and merchandise available at childishgambino.com
+## 6:                                                                                              YouTube Rewind 2017. Celebrating the videos  people  music and memes that made 2017. #YouTubeRewind  Meet the featured Creators in Rewind: https://rewind2017.withyoutube.com/creators Spend more time with your favorite Creators  videos and trends from 2017: https://yt.be/rewind2017 Test your Rewind knowledge with our trivia game: http://yt.be/dejaview  Watch trending videos from 2017: http://youtube.com/rewind See the trends as they happen: http://youtube.com/trending  Watch the Behind the Scenes video: https://youtu.be/OIQQ8jmsbMM   See all the Easter Eggs: https://goo.gl/3U9otg  Music by The Hood Internet: https://www.youtube.com/thehoodinternet  YouTube Rewind 2017 produced by Portal A
+##    dif_days Percentage_Likes Percentage_Disikes Percentage_comments
+## 1:        4           2.6327             1.3414              0.6767
+## 2:        3           2.9641             1.4846              1.0896
+## 3:        3           7.2638             0.2171              1.5917
+## 4:        2           7.1197             0.1896              1.4426
+## 5:        4           3.5931             0.1717              0.3829
+## 6:        2           3.5958             1.6821              1.3358
+##    Percentage_views_days Links_count
+## 1:            2522789175           8
+## 2:            2532315633           8
+## 3:            2179871900           7
+## 4:            3139819500           7
+## 5:            1519412725           1
+## 6:            2630586500           8
+##                                                                                                                                                                                                                Urls_description
+## 1:                                            https://rewind2017.withyoutube.com/creators,https://yt.be/rewind2017,http://yt.be/dejaview,http://youtube.com/rewind,http://youtube.com/trending,https://youtu.be/OIQQ8jmsbMM,...
+## 2:                                            https://rewind2017.withyoutube.com/creators,https://yt.be/rewind2017,http://yt.be/dejaview,http://youtube.com/rewind,http://youtube.com/trending,https://youtu.be/OIQQ8jmsbMM,...
+## 3: http://www.ibighit.com,http://twitter.com/BTS_bighit,http://twitter.com/BTS_twt,https://www.facebook.com/ibighit/http://www.facebook.com/bangtan.officialhttp://instagram.com/BTS.bighitofficialhttp://weibo.com/BTSbighitBU
+## 4: http://www.ibighit.com,http://twitter.com/BTS_bighit,http://twitter.com/BTS_twt,https://www.facebook.com/ibighit/http://www.facebook.com/bangtan.officialhttp://instagram.com/BTS.bighitofficialhttp://weibo.com/BTSbighitBU
+## 5:                                                                                                                                                                                            http://smarturl.it/TcIgADirector:
+## 6:                                            https://rewind2017.withyoutube.com/creators,https://yt.be/rewind2017,http://yt.be/dejaview,http://youtube.com/rewind,http://youtube.com/trending,https://youtu.be/OIQQ8jmsbMM,...
+##    Reference_count      category
+## 1:               0 Entertainment
+## 2:               0 Entertainment
+## 3:               0         Music
+## 4:               0         Music
+## 5:               0         Music
+## 6:               0 Entertainment
+```
+
+```r
+p <- plot_ly(videos, labels = ~category, type = 'pie') %>%
+  layout(title = 'French dataset number of videos per category',
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+p
+```
+
+```
+## Error in loadNamespace(name): there is no package called 'webshot'
+```
+
+
+```r
+p <- plot_ly(videos, labels = ~category, values = ~views, type = 'pie') %>%
+  layout(title = 'Youtubes Video Views per categories',
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+p
+```
+
+```
+## Error in loadNamespace(name): there is no package called 'webshot'
+```
+
+
+
+
+
+
+
+# Relationship betwenn Views, Likes and Coment Counts 
+
+```r
+colors <- c('#4AC6B7', '#1972A4', '#965F8A', '#FF7070', '#C61951')
+p = plot_ly(x=videos$likes, y=videos$views, z=videos$comment_count, marker = list(color = videos$views, colorscale = c('#FFE1A1', '#683531'), showscale = TRUE)) %>%
+  add_markers() %>%
+  layout(scene = list(xaxis = list(title = 'Likes'),
+                     yaxis = list(title = 'Views'),
+                     zaxis = list(title = 'Comment Counts')))
+p
+```
+
+```
+## Error in loadNamespace(name): there is no package called 'webshot'
+```
+From this 3D scatter plot we can see the videos with the most likes and comment counts are also those with the most views. In fact this likes and comment counts are a good predictors for the number of views of a video.
+
+
+
+
+# Analysis of title & tags with wordcloud
+Word analysis gives us a good idea of the themes of the moment, the types of videos that work by categories.
+We therefore retrieve a set of words that returns frequently by removing as many linking words as possible and we can return a bag of words associated with the category and the text
+
+## Word cloud of videos title per categories {.tabset .tabset-fade}
+
+
+
+### Music 
+
+
+```r
+freqWord("Music")
+```
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png)
+
+
+### Entertainment
+
+
+```r
+freqWord("Entertainment")
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png)
+
+
+### Gaming
+
+
+```r
+freqWord("Gaming")
+```
+
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png)
+
+### Film & Animation
+
+
+```r
+freqWord("Film & Animation")
+```
+
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png)
+
+### Autos & Vehicles
+
+
+```r
+freqWord("Autos & Vehicles")
+```
+
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png)
+
+### Pets & Animals
+
+
+```r
+freqWord("Pets & Animals")
+```
+
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png)
+
+### Sports
+
+
+```r
+freqWord("Sports")
+```
+
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png)
+
+### Travel & Events
+
+
+```r
+freqWord("Travel & Events")
+```
+
+![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14-1.png)
+
+### Gaming
+
+
+```r
+freqWord("Gaming")
+```
+
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png)
+
+### People & Blogs
+
+
+```r
+freqWord("People & Blogs")
+```
+
+![plot of chunk unnamed-chunk-16](figure/unnamed-chunk-16-1.png)
+
+### Comedy
+
+
+```r
+freqWord("Comedy")
+```
+
+![plot of chunk unnamed-chunk-17](figure/unnamed-chunk-17-1.png)
+
+### News & Politics
+
+
+```r
+freqWord("News & Politics")
+```
+
+![plot of chunk unnamed-chunk-18](figure/unnamed-chunk-18-1.png)
+
+### Howto & Style
+
+
+```r
+freqWord("Howto & Style")
+```
+
+![plot of chunk unnamed-chunk-19](figure/unnamed-chunk-19-1.png)
+
+### Education
+
+
+```r
+freqWord("Education")
+```
+
+![plot of chunk unnamed-chunk-20](figure/unnamed-chunk-20-1.png)
+
+### Science & Technology
+
+
+```r
+freqWord("Science & Technology")
+```
+
+![plot of chunk unnamed-chunk-21](figure/unnamed-chunk-21-1.png)
+
+### Undefined
+
+
+```r
+freqWord("undefined")
+```
+
+![plot of chunk unnamed-chunk-22](figure/unnamed-chunk-22-1.png)
+
+
+
+## Word cloud of of videos tags per categories {.tabset .tabset-fade}
+
+
+
+### Music 
+
+
+```r
+freqWordTag("Music")
+```
+
+![plot of chunk unnamed-chunk-24](figure/unnamed-chunk-24-1.png)
+
+
+### Entertainment
+
+
+```r
+freqWordTag("Entertainment")
+```
+
+![plot of chunk unnamed-chunk-25](figure/unnamed-chunk-25-1.png)
+
+
+### Gaming
+
+
+```r
+freqWordTag("Gaming")
+```
+
+![plot of chunk unnamed-chunk-26](figure/unnamed-chunk-26-1.png)
+
+### Film & Animation
+
+
+```r
+freqWordTag("Film & Animation")
+```
+
+![plot of chunk unnamed-chunk-27](figure/unnamed-chunk-27-1.png)
+
+### Autos & Vehicles
+
+
+```r
+freqWordTag("Autos & Vehicles")
+```
+
+![plot of chunk unnamed-chunk-28](figure/unnamed-chunk-28-1.png)
+
+### Pets & Animals
+
+
+```r
+freqWordTag("Pets & Animals")
+```
+
+![plot of chunk unnamed-chunk-29](figure/unnamed-chunk-29-1.png)
+
+### Sports
+
+
+```r
+freqWordTag("Sports")
+```
+
+![plot of chunk unnamed-chunk-30](figure/unnamed-chunk-30-1.png)
+
+### Travel & Events
+
+
+```r
+freqWordTag("Travel & Events")
+```
+
+![plot of chunk unnamed-chunk-31](figure/unnamed-chunk-31-1.png)
+
+### Gaming
+
+
+```r
+freqWordTag("Gaming")
+```
+
+![plot of chunk unnamed-chunk-32](figure/unnamed-chunk-32-1.png)
+
+### People & Blogs
+
+
+```r
+freqWordTag("People & Blogs")
+```
+
+![plot of chunk unnamed-chunk-33](figure/unnamed-chunk-33-1.png)
+
+### Comedy
+
+
+```r
+freqWordTag("Comedy")
+```
+
+![plot of chunk unnamed-chunk-34](figure/unnamed-chunk-34-1.png)
+
+### News & Politics
+
+
+```r
+freqWordTag("News & Politics")
+```
+
+![plot of chunk unnamed-chunk-35](figure/unnamed-chunk-35-1.png)
+
+### Howto & Style
+
+
+```r
+freqWordTag("Howto & Style")
+```
+
+![plot of chunk unnamed-chunk-36](figure/unnamed-chunk-36-1.png)
+
+### Education
+
+
+```r
+freqWordTag("Education")
+```
+
+![plot of chunk unnamed-chunk-37](figure/unnamed-chunk-37-1.png)
+
+### Science & Technology
+
+
+```r
+freqWordTag("Science & Technology")
+```
+
+![plot of chunk unnamed-chunk-38](figure/unnamed-chunk-38-1.png)
+
+### Undefined
+
+
+```r
+freqWordTag("undefined")
+```
+
+![plot of chunk unnamed-chunk-39](figure/unnamed-chunk-39-1.png)
+
+## Analysis 1% / 10% / 25% of views {.tabset .tabset-fade}
+The goal of this study is to determine how the views field of the videos behave when we compare the top 1% , 10%, 25% vs the rest. For this analysis we ommited the music category because musicians are not content creators and the number of views of music video is influenced by how famous this muscian is which is not represented in our datset.
+
+
+```r
+subset = function(percentage) {
+    len = length(videos$likes)
+   return (list((left = videos[0:floor(len*percentage)]), (right = videos[floor((len*percentage)+1): len-1])))
+}
+```
+
+### 25% / 75%
+
+
+```r
+x = subset(0.25)
+left = x[[1]]
+right = x[[2]]
+left = left[category != 'Music']
+right = right[category != 'Music']
+p1 <- plot_ly(type = 'box')  %>%
+  add_boxplot(x = left$category, y = left$views, 
+              name = "Views 25%", boxpoints = 'outliers',
+              marker = list(color = 'rgb(107,174,214)'),
+              line = list(color = 'rgb(107,174,214)')) %>%
+  layout(p, yaxis = list(type = "log"))
+p2 <- plot_ly(type = 'box')  %>%
+  add_boxplot(x = right$category, y = right$views, name = "Views 75%", boxpoints = 'outliers',
+              marker = list(color = 'rgb(9,56,125)'),
+              line = list(color = 'rgb(9,56,125)'))%>%
+  layout(p, yaxis = list(type = "log"), title = "Box plots for views for 2 subdataset")
+p <- subplot(p1, p2)
+p
+```
+
+```
+## Error in loadNamespace(name): there is no package called 'webshot'
+```
+
+### 10% / 90%
+
+
+```r
+x = subset(0.10)
+left = x[[1]]
+right = x[[2]]
+left = left[category != 'Music']
+right = right[category != 'Music']
+p1 <- plot_ly(type = 'box')  %>%
+  add_boxplot(x = left$category, y = left$views, 
+              name = "Views 10%", boxpoints = 'outliers',
+              marker = list(color = 'rgb(107,174,214)'),
+              line = list(color = 'rgb(107,174,214)')) %>%
+  layout(p, yaxis = list(type = "log"))
+p2 <- plot_ly(type = 'box')  %>%
+  add_boxplot(x = right$category, y = right$views, name = "Views 90%", boxpoints = 'outliers',
+              marker = list(color = 'rgb(9,56,125)'),
+              line = list(color = 'rgb(9,56,125)'))%>%
+  layout(p, yaxis = list(type = "log"), title = "Box plots for views for 2 subdataset")
+p <- subplot(p1, p2)
+p
+```
+
+```
+## Error in loadNamespace(name): there is no package called 'webshot'
+```
+
+### 1% / 99%
+
+
+```r
+x = subset(0.1)
+left = x[[1]]
+right = x[[2]]
+left = left[category != 'Music']
+right = right[category != 'Music']
+p1 <- plot_ly(type = 'box')  %>%
+  add_boxplot(x = left$category, y = left$views, 
+              name = "Views 1%", boxpoints = 'outliers',
+              marker = list(color = 'rgb(107,174,214)'),
+              line = list(color = 'rgb(107,174,214)')) %>%
+  layout(p, yaxis = list(type = "log"))
+p2 <- plot_ly(type = 'box')  %>%
+  add_boxplot(x = right$category, y = right$views, name = "Views 99", boxpoints = 'outliers',
+              marker = list(color = 'rgb(9,56,125)'),
+              line = list(color = 'rgb(9,56,125)'))%>%
+  layout(p, yaxis = list(type = "log"), title = "Box plots for views for 2 subdataset")
+p <- subplot(p1, p2)
+p
+```
+
+```
+## Error in loadNamespace(name): there is no package called 'webshot'
+```
+
+From this analysis we can observe that the top 10% most watched videos are watched ten times more than the rest 90%, we can also see that this is true for all the categories. The views are distributed even-handedely between the different categories.
